@@ -1,0 +1,119 @@
+# general settings
+name: test_simpleCNN
+model_type: SRModel
+scale: 2
+num_gpu: 1
+manual_seed: 42
+
+# datasets
+datasets:
+  test_1:  # Set5: 基础测试集
+    task: SR
+    name: Set5
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Set5/HR
+    dataroot_lq: datasets/benchmark/Set5/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk
+
+  test_2:  # Set14: 常用验证集
+    task: SR
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Set14/HR
+    dataroot_lq: datasets/benchmark/Set14/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk
+
+  test_3:  # Urban100: 强烈建议测试，含有大量重复建筑纹理，最能体现频域 DFT 注意力的优势
+    task: SR
+    name: Urban100
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Urban100/HR
+    dataroot_lq: datasets/benchmark/Urban100/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: SimpleCNN
+  scale: 2
+
+# path
+path:
+  # 请根据你的实验结果修改 pretrain_network_g 的路径
+  pretrain_network_g: experiments/simpleCNN/models/net_g_latest.pth
+  strict_load_g: true
+
+# validation settings
+val:
+  save_img: true
+  suffix: ~  # 在保存的图片名后添加后缀，若为 None 则使用实验名称
+
+  metrics:
+    psnr: # 峰值信噪比
+      type: calculate_psnr
+      crop_border: 2
+      test_y_channel: true
+    ssim: # 结构相似性
+      type: calculate_ssim
+      crop_border: 2
+      test_y_channel: true
+# # general settings
+# name: test_simpleCNN
+# model_type: SRModel
+# scale: 2
+# num_gpu: 1
+# manual_seed: 10
+
+# datasets:
+#   test_1:  # the 1st test dataset
+#     task: SR
+#     name: Set5
+#     type: PairedImageDataset
+#     dataroot_gt: datasets/benchmark/Set5/HR
+#     dataroot_lq: datasets/benchmark/Set5/LR_bicubic/X2
+#     filename_tmpl: '{}x2'
+#     io_backend:
+#       type: disk
+
+#   test_2:  # the 2st test dataset
+#     task: SR
+#     name: Set14
+#     type: PairedImageDataset
+#     dataroot_gt: datasets/benchmark/Set14/HR
+#     dataroot_lq: datasets/benchmark/Set14/LR_bicubic/X2
+#     filename_tmpl: '{}x2'
+#     io_backend:
+#       type: disk
+
+
+
+# # network structures
+# network_g:
+#   type: SimpleCNN
+#   scale: 2
+
+# # path
+# path:
+#   pretrain_network_g: experiments/train_simpleCNN/models/net_g_2000.pth # use this model to test
+#   strict_load_g: True
+
+# # validation settings
+# val:
+#   save_img: True
+#   suffix: ~  # add suffix to saved images, if None, use exp name
+#   use_chop: False  # True to save memory, if img too large
+
+#   metrics:
+#     psnr: # metric name, can be arbitrary
+#       type: calculate_psnr
+#       crop_border: 2
+#       test_y_channel: True
+#     ssim:
+#       type: calculate_ssim
+#       crop_border: 2
+#       test_y_channel: True

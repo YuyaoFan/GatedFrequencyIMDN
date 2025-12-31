@@ -1,0 +1,88 @@
+# general settings
+name: BasicDistillNet
+model_type: SRModel
+scale: 2
+num_gpu: 1
+manual_seed: 42
+
+datasets:
+  train:
+    name: DF2K
+    type: PairedImageDataset
+    dataroot_gt: datasets/DF2K/HR
+    dataroot_lq: datasets/DF2K/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk # 确保此处存在
+
+    gt_size: 128
+    use_hflip: true
+    use_rot: true
+    use_shuffle: true
+    num_worker_per_gpu: 6
+    batch_size_per_gpu: 64
+    dataset_enlarge_ratio: 10
+
+  val:
+    name: Set5
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Set5/HR
+    dataroot_lq: datasets/benchmark/Set5/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk # 修复点：添加此项以解决 KeyError
+
+network_g:
+  type: BasicDistillNet
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 48
+  num_blocks: 6
+  scale: 2
+
+path:
+  pretrain_network_g: ~
+  strict_load_g: false
+
+train:
+  optim_g:
+    type: Adam
+    lr: !!float 5e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: CosineAnnealingLR
+    T_max: 20000
+    eta_min: !!float 1e-7
+
+  warmup_iter: 500 
+  total_iter: 20000
+
+  pixel_opt:
+    type: L1CosineLoss # 使用我们定义的复合损失
+    loss_weight: 1.0
+    cos_weight: 0.05
+    reduction: mean
+
+val:
+  val_freq: !!float 2000
+  save_img: true
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 2
+      test_y_channel: true
+
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 5000
+  use_tb_logger: True
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

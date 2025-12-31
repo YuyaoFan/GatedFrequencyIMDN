@@ -1,0 +1,12 @@
+addict
+future
+lmdb
+numpy
+opencv-python
+pyyaml
+scikit-image
+scipy
+tensorboard
+tqdm
+requests
+pygments

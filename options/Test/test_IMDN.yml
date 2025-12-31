@@ -1,0 +1,68 @@
+# general settings
+name: test_IMDN
+model_type: SRModel
+scale: 2
+num_gpu: 1
+manual_seed: 42
+
+# datasets
+datasets:
+  test_1:  # Set5: 基础测试集
+    task: SR
+    name: Set5
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Set5/HR
+    dataroot_lq: datasets/benchmark/Set5/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk
+
+  test_2:  # Set14: 常用验证集
+    task: SR
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Set14/HR
+    dataroot_lq: datasets/benchmark/Set14/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk
+
+  test_3:  # Urban100: 强烈建议测试，含有大量重复建筑纹理，最能体现频域 DFT 注意力的优势
+    task: SR
+    name: Urban100
+    type: PairedImageDataset
+    dataroot_gt: datasets/benchmark/Urban100/HR
+    dataroot_lq: datasets/benchmark/Urban100/LR_bicubic/X2
+    filename_tmpl: '{}x2'
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: IMDN
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 48
+  num_blocks: 6
+  scale: 2
+
+# path
+path:
+  # 请根据你的实验结果修改 pretrain_network_g 的路径
+  pretrain_network_g: experiments/IMDN/models/net_g_20000.pth
+  strict_load_g: true
+
+# validation settings
+val:
+  save_img: true
+  suffix: ~  # 在保存的图片名后添加后缀，若为 None 则使用实验名称
+
+  metrics:
+    psnr: # 峰值信噪比
+      type: calculate_psnr
+      crop_border: 2
+      test_y_channel: true
+    ssim: # 结构相似性
+      type: calculate_ssim
+      crop_border: 2
+      test_y_channel: true
